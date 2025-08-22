@@ -12,6 +12,7 @@
   LNG_MM5 = "Exit"
   LNG_MM6 = "Credits"
   LNG_MM7 = "Install HDD Exploits"
+  LNG_MM8 = "File Browser"
   LNG_CT0 = "Select"
   LNG_CT1 = "Cancel"
   LNG_CT2 = "Refresh"
