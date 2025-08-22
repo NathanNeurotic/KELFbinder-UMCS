@@ -1100,8 +1100,9 @@ void fntDrawQuad(rm_quad_t *q)
 
 
 /* PRIVATE METHODS */
-static int vsync_handler()
+static int vsync_handler(int cause)
 {
+   (void)cause;
    iSignalSema(vsync_sema_id);
 
    ExitHandler();
@@ -1293,7 +1294,7 @@ GSTEXTURE* luaP_loadHWCpng(int fotoID, bool delayed)
 	
 	data_pointer d;
 	d.buf = NULL;
-	d.size = NULL;
+	d.size = 0;
 
 	switch (fotoID)
 	{
