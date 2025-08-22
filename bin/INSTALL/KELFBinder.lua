@@ -398,7 +398,7 @@ function MainMenu()
     else
       Font.ftPrint(LSANS, X_MID, 350, 0, 630, 16, LNG_MM6, Color.new(200, 200, 200, 0x80 - A))
     end
-	if T == 7 then
+    if T == 7 then
       Font.ftPrint(LSANS, X_MID+1, 390, 0, 630, 16, LNG_MM5, Color.new(0, 0xde, 0xff, 0x90 - A))
     else
       Font.ftPrint(LSANS, X_MID, 390, 0, 630, 16, LNG_MM5, Color.new(200, 200, 200, 0x80 - A))
@@ -1843,136 +1843,6 @@ function SystemInfo()
   end
 end
 
-function FileBrowser()
-  local port = MemcardPickup()
-  if port ~= -1 then
-    FileBrowserDisplay(port, string.format("mc%d:/", port))
-  end
-end
-
-function RecursiveRemoveDirectory(path)
-  local files = System.listDirectory(path)
-  for i = 1, #files do
-    local item_path = path .. files[i]
-    if System.doesDirExist(item_path) then
-      RecursiveRemoveDirectory(item_path .. "/")
-    else
-      System.removeFile(item_path)
-    end
-  end
-  System.removeDirectory(path)
-end
-
-function FileBrowserDisplay(port, path)
-  local files = System.listDirectory(path)
-  local selected = 1
-  local top = 1
-  local delay = 15
-  local checked_items = {}
-  local triangle_press_count = 0
-  local triangle_timer = 0
-
-  while true do
-    Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
-    ORBMAN(0x80)
-    Font.ftPrint(LSANS, X_MID, 40, 8, 630, 32, path, Color.new(220, 220, 220, 0x90))
-
-    local y = 80
-    for i = top, #files do
-      if y > 400 then break end
-      local item_path = path .. files[i]
-      local is_dir = System.doesDirExist(item_path)
-      local color
-      if selected == i then
-        color = Color.new(0, 0xde, 0xff, 0x90)
-      else
-        color = Color.new(200, 200, 200, 0x80)
-      end
-
-      if checked_items[item_path] then
-        Graphics.drawImage(CHKF, 80, y)
-      else
-        Graphics.drawImage(CHK_, 80, y)
-      end
-
-      if is_dir then
-        Font.ftPrint(LSANS, 120, y, 0, 630, 16, "[ " .. files[i] .. " ]", color)
-      else
-        Font.ftPrint(LSANS, 120, y, 0, 630, 16, files[i], color)
-      end
-      y = y + 20
-    end
-
-    Promptkeys(1, LNG_CT0, 1, LNG_CT1, 0, 0, 0)
-    Screen.flip()
-
-    local pad = Pads.get()
-    if Pads.check(pad, PAD_CROSS) and delay == 0 then
-      local item_path = path .. files[selected]
-      if System.doesDirExist(item_path) then
-        FileBrowserDisplay(port, item_path .. "/")
-      end
-    end
-
-    if Pads.check(pad, PAD_SQUARE) and delay == 0 then
-      local item_path = path .. files[selected]
-      checked_items[item_path] = not checked_items[item_path]
-      delay = 5
-    end
-
-    if Pads.check(pad, PAD_CIRCLE) and delay == 0 then
-      break
-    end
-
-    if Pads.check(pad, PAD_TRIANGLE) and delay == 0 then
-      if triangle_press_count == 0 then
-        triangle_press_count = 1
-        triangle_timer = 30 -- 0.5 seconds
-      else
-        for item, checked in pairs(checked_items) do
-          if checked then
-            if System.doesDirExist(item) then
-              RecursiveRemoveDirectory(item .. "/")
-            else
-              System.removeFile(item)
-            end
-          end
-        end
-        -- Refresh
-        files = System.listDirectory(path)
-        checked_items = {}
-        triangle_press_count = 0
-        triangle_timer = 0
-      end
-      delay = 5
-    end
-
-    if triangle_timer > 0 then
-      triangle_timer = triangle_timer - 1
-      if triangle_timer == 0 then
-        triangle_press_count = 0
-      end
-    end
-
-    if Pads.check(pad, PAD_UP) and delay == 0 then
-      selected = selected - 1
-      if selected < 1 then selected = #files end
-      if selected < top then top = selected end
-      delay = 5
-    end
-
-    if Pads.check(pad, PAD_DOWN) and delay == 0 then
-      selected = selected + 1
-      if selected > #files then selected = 1 end
-      if selected > top + 15 then top = selected - 15 end
-      delay = 5
-    end
-
-    if delay > 0 then delay = delay - 1 end
-  end
-end
-
 function Credits()
   local pad = 0
   local Q = 1
@@ -2106,9 +1976,7 @@ while true do
       Report(ret, true, false)
       OrbIntro(1)
     end
-  elseif TT == 3 then
-    -- FileBrowser() -- Add this function later
-  elseif TT == 4 and RPC_STATUS == 0 then -- DVDPLAYER
+  elseif TT == 3 and RPC_STATUS == 0 then -- DVDPLAYER
     local port = MemcardPickup()
     WaitWithORBS(20)
     if (port >= 0) then
@@ -2118,11 +1986,11 @@ while true do
         DVDPlayerINST(port, 0, target_region)
       end
     end
-  elseif TT == 5 then
+  elseif TT == 4 then
     SystemInfo()
-  elseif TT == 6 then
+  elseif TT == 5 then
     Credits()
-  elseif TT == 7 then
+  elseif TT == 6 then
     Ask2quit()
   end
   -- SYSTEM UPDATE
